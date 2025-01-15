@@ -1,0 +1,31 @@
+import 'dotenv/config';
+
+import * as joi from 'joi';
+
+interface EnvVars {
+  PORT: number;
+  RESERVAS_MS_PORT: number;
+  RESERVAS_MS_HOST: string;
+}
+
+const envVarsSchema = joi
+  .object({
+    PORT: joi.number().required(),
+    RESERVAS_MS_PORT: joi.number().required(),
+    RESERVAS_MS_HOST: joi.string().required(),
+  })
+  .unknown(true);
+
+const { error, value } = envVarsSchema.validate(process.env);
+
+if (error) {
+  throw new Error(`Config validation error: ${error.message}`);
+}
+
+const envVars: EnvVars = value;
+
+export const envs = {
+  port: envVars.PORT,
+  reservasMsPort: envVars.RESERVAS_MS_PORT,
+  reservasMsHost: envVars.RESERVAS_MS_HOST,
+};

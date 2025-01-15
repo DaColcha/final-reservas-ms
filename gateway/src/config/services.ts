@@ -1,0 +1,1 @@
+export const RESERVAS_SERVICE = 'RESERVAS_SERVICE';
