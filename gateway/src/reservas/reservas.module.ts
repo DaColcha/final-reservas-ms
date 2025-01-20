@@ -7,7 +7,6 @@ import { envs, RESERVAS_SERVICE } from '../config';
   controllers: [ReservasController],
   providers: [],
   imports: [
-
     ClientsModule.register([
       {
         name: RESERVAS_SERVICE,
@@ -15,8 +14,9 @@ import { envs, RESERVAS_SERVICE } from '../config';
         options: {
           host: envs.reservasMsHost,
           port: envs.reservasMsPort,
-        }},
-    ])
-  ]
+        },
+      },
+    ]),
+  ],
 })
 export class ReservasModule {}

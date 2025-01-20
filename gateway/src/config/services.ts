@@ -1,1 +1,2 @@
 export const RESERVAS_SERVICE = 'RESERVAS_SERVICE';
+export const AUTH_SERVICE = 'AUTH_SERVICE';
