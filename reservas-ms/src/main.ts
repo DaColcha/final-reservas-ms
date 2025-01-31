@@ -11,7 +11,8 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        port: envs.port,
+          host: '::',
+          port: envs.port,
       },
     },
   );
