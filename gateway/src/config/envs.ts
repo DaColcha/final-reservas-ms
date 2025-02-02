@@ -8,6 +8,8 @@ interface EnvVars {
   RESERVAS_MS_HOST: string;
   AUTH_MS_PORT: number;
   AUTH_MS_HOST: string;
+  MENU_MS_PORT: number;
+  MENU_MS_HOST: string;
 }
 
 const envVarsSchema = joi
@@ -17,6 +19,8 @@ const envVarsSchema = joi
     RESERVAS_MS_HOST: joi.string().required(),
     AUTH_MS_PORT: joi.number().required(),
     AUTH_MS_HOST: joi.string().required(),
+    MENU_MS_PORT: joi.number().required(),
+    MENU_MS_HOST: joi.string().required(),
   })
   .unknown(true);
 
@@ -34,4 +38,6 @@ export const envs = {
   reservasMsHost: envVars.RESERVAS_MS_HOST,
   authMsPort: envVars.AUTH_MS_PORT,
   authMsHost: envVars.AUTH_MS_HOST,
+  menuMsPort: envVars.MENU_MS_PORT,
+  menuMsHost: envVars.MENU_MS_HOST,
 };
