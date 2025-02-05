@@ -17,7 +17,9 @@ import { envs } from './config';
       database: envs.dbDatabase,
       synchronize: true,
       autoLoadEntities: true,
-      ssl: false,
+      ssl: {
+        rejectUnauthorized: false, // Permite conexiones sin verificación de certificado
+      },
     }),
     AuthModule,
   ],
