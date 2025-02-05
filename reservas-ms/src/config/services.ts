@@ -1,1 +1,2 @@
 export const AUTH_SERVICE = 'AUTH_SERVICE';
+export const MESA_SERVICE = 'MESA_SERVICE';

@@ -11,6 +11,8 @@ interface EnvVars {
   DB_USER: string;
   AUTH_MS_PORT: number;
   AUTH_MS_HOST: string;
+  MESA_MS_PORT: number;
+  MESA_MS_HOST: string;
 }
 
 const envVarsSchema = joi
@@ -23,6 +25,8 @@ const envVarsSchema = joi
     DB_USER: joi.string().required(),
     AUTH_MS_PORT: joi.number().required(),
     AUTH_MS_HOST: joi.string().required(),
+    MESA_MS_PORT: joi.number().required(),
+    MESA_MS_HOST: joi.string().required(),
   })
   .unknown(true);
 
@@ -43,4 +47,6 @@ export const envs = {
   dbUser: envVars.DB_USER,
   authMsPort: envVars.AUTH_MS_PORT,
   authMsHost: envVars.AUTH_MS_HOST,
+  mesaMsPort: envVars.MESA_MS_PORT,
+  mesaMsHost: envVars.MESA_MS_HOST,
 };

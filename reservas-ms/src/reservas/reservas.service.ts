@@ -1,13 +1,13 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { CreateReservaDto } from './dto';
+import { CreateReservaDto, MesaDto } from './dto';
 import { UpdateReservaDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './entities/reserva.entity';
 import { Repository } from 'typeorm';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { isUUID } from 'class-validator';
-import { AUTH_SERVICE } from '../config';
-import { catchError } from 'rxjs';
+import { AUTH_SERVICE, MESA_SERVICE } from '../config';
+import { catchError, firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ReservasService {
@@ -18,15 +18,22 @@ export class ReservasService {
     private readonly reservaRepository: Repository<Reserva>,
 
     @Inject(AUTH_SERVICE) private readonly authClient: ClientProxy,
+    @Inject(MESA_SERVICE) private readonly mesasClient: ClientProxy,
   ) {}
 
   async create(createReservaDto: CreateReservaDto) {
-    //TODO: Consultar disponibilidad de MESA
-    // const mesa = await this.mesasService.findAvaiblable(
-    //   createReservaDto.cantidadPersonas,
-    // );
+    const mesa: MesaDto = await firstValueFrom(
+      this.mesasClient
+        .send<MesaDto>('findAvailableMesa', {
+          num: createReservaDto.cantidadPersonas,
+        })
+        .pipe(
+          catchError((err) => {
+            throw new RpcException(err);
+          }),
+        ),
+    );
 
-    const mesa = 1;
     const usuario = this.authClient
       .send('checkUserExistence', { userId: createReservaDto.usuarioId })
       .pipe(
@@ -48,14 +55,19 @@ export class ReservasService {
         const reserva = this.reservaRepository.create({
           ...rest,
           estado: 'solicitada',
-          mesa: mesa,
+          mesa: mesa.id,
           usuario: usuarioId,
         });
 
         await this.reservaRepository.save(reserva);
 
-        //TODO: Actualizar estado de la mesa
-        // await this.mesasService.updateState(mesa.id, false); // Ocupar mesa
+        this.mesasClient
+          .send('updateStateMesa', { id: mesa.id, state: false })
+          .pipe(
+            catchError((err) => {
+              throw new RpcException(err);
+            }),
+          );
 
         return {
           ...reserva,
@@ -165,8 +177,13 @@ export class ReservasService {
         updateDto.estado === 'cancelada' ||
         updateDto.estado === 'finalizada'
       ) {
-        //TODO: Consultar liberar mesa
-        // await this.mesasService.updateState(reserva.mesa.id, true);
+        this.mesasClient
+          .send('updateStateMesa', { id: reserva.mesa, state: true })
+          .pipe(
+            catchError((err) => {
+              throw new RpcException(err);
+            }),
+          );
 
         this.logger.log('Mesa liberada');
       }
@@ -182,7 +199,13 @@ export class ReservasService {
 
     if (reserva) await this.reservaRepository.delete(reserva.id);
 
-    //TODO: Consultar liberar mesa
+    this.mesasClient
+      .send('updateStateMesa', { id: reserva.mesa, state: true })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
 
     return { message: 'Reserva eliminada', status: HttpStatus.OK };
   }
