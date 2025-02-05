@@ -18,6 +18,9 @@ import { envs } from './config/envs';
       database: envs.dbDatabase,
       synchronize: true,
       autoLoadEntities: true,
+      ssl: {
+        rejectUnauthorized: false,
+      }
     }),
 
     MesasModule],
