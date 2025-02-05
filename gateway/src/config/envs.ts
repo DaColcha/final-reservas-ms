@@ -10,6 +10,8 @@ interface EnvVars {
   AUTH_MS_HOST: string;
   MENU_MS_PORT: number;
   MENU_MS_HOST: string;
+  MESA_MS_PORT: number;
+  MESA_MS_HOST: string;
 }
 
 const envVarsSchema = joi
@@ -21,6 +23,8 @@ const envVarsSchema = joi
     AUTH_MS_HOST: joi.string().required(),
     MENU_MS_PORT: joi.number().required(),
     MENU_MS_HOST: joi.string().required(),
+    MESA_MS_PORT: joi.number().required(),
+    MESA_MS_HOST: joi.string().required(),
   })
   .unknown(true);
 
@@ -40,4 +44,6 @@ export const envs = {
   authMsHost: envVars.AUTH_MS_HOST,
   menuMsPort: envVars.MENU_MS_PORT,
   menuMsHost: envVars.MENU_MS_HOST,
+  mesaMsPort: envVars.MESA_MS_PORT,
+  mesaMsHost: envVars.MESA_MS_HOST,
 };
