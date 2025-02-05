@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, ParseIntPipe, ParseBoolPipe } from '@nestjs/common';
 import { MESA_SERVICE } from '../config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { catchError } from 'rxjs';
+import { catchError, tap } from 'rxjs';
 
 @Controller('mesas')
 export class MesasController {
@@ -10,8 +10,8 @@ export class MesasController {
   ) {}
 
   @Get('disponible/:num')
-  findAvailable(@Param('num') num: number) {
-    return this.mesasClient.send('findAvailableMesa', {num}).pipe(
+  findAvailable(@Param('num', ParseIntPipe) num: number) {
+    return this.mesasClient.send('findAvailableMesa', num).pipe(
       catchError((err) => {
         throw new RpcException(err);
       }),
@@ -20,10 +20,12 @@ export class MesasController {
 
   @Patch(':id/:state')
   updateState(
-    @Param('id') id: number,
-    @Param('state') state: boolean,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('state', ParseBoolPipe) state: boolean,
   ) {
+    console.log(`Gateway enviando actualización de mesa: id=${id}, state=${state}`);
     return this.mesasClient.send('updateStateMesa', { id, state }).pipe(
+      tap((data) => console.log(`Gateway recibió respuesta del microservicio:`, data)),
       catchError((err) => {
         throw new RpcException(err);
       }),

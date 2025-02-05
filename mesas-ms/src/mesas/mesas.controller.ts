@@ -12,8 +12,9 @@ export class MesasController {
   }
 
   @MessagePattern('updateStateMesa')
-  updateState(@Payload() id: number, state : boolean) {
-    return this.mesasService.updateState(id, state);
+  updateState(@Payload() data: {id: number, state : boolean}) {
+    console.log(`Microservicio recibió solicitud:`, data);
+    return this.mesasService.updateState(data.id, data.state);
   }
 
 }
