@@ -1,11 +1,13 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateReservaDto } from './dto';
 import { UpdateReservaDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './entities/reserva.entity';
 import { Repository } from 'typeorm';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { isUUID } from 'class-validator';
+import { AUTH_SERVICE } from '../config';
+import { catchError } from 'rxjs';
 
 @Injectable()
 export class ReservasService {
@@ -15,7 +17,7 @@ export class ReservasService {
     @InjectRepository(Reserva)
     private readonly reservaRepository: Repository<Reserva>,
 
-    //TODO: Inyectar microservicios USER y MESAS
+    @Inject(AUTH_SERVICE) private readonly authClient: ClientProxy,
   ) {}
 
   async create(createReservaDto: CreateReservaDto) {
@@ -25,12 +27,13 @@ export class ReservasService {
     // );
 
     const mesa = 1;
-    const usuario = 'c6e6c347-7429-4701-9e69-f7cdda6ef729';
-
-    //TODO: Consultar existencia de USUARIO
-    //   await this.userRepository.findOneBy({
-    //   id: createReservaDto.usuarioId,
-    // });
+    const usuario = this.authClient
+      .send('checkUserExistence', { userId: createReservaDto.usuarioId })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
 
     if (!usuario)
       throw new RpcException({
@@ -38,13 +41,15 @@ export class ReservasService {
         status: HttpStatus.NOT_FOUND,
       });
 
+    const { usuarioId, ...rest } = createReservaDto;
+
     try {
       if (mesa) {
         const reserva = this.reservaRepository.create({
-          ...createReservaDto,
+          ...rest,
           estado: 'solicitada',
           mesa: mesa,
-          usuario: usuario,
+          usuario: usuarioId,
         });
 
         await this.reservaRepository.save(reserva);
@@ -133,11 +138,13 @@ export class ReservasService {
     if (updateDto.usuarioId) {
       const { usuarioId, ...rest } = updateDto;
 
-      const usuario = 'c6e6c347-7429-4701-9e69-f7cdda6ef729';
-      //TODO: Consultar existencia de USUARIO
-      // const usuario = await this.userRepository.findOneBy({
-      //   id: updateReservaDto.usuarioId,
-      // });
+      const usuario = this.authClient
+        .send('checkUserExistence', { userId: usuarioId })
+        .pipe(
+          catchError((err) => {
+            throw new RpcException(err);
+          }),
+        );
 
       if (!usuario)
         throw new RpcException({
@@ -145,7 +152,7 @@ export class ReservasService {
           status: HttpStatus.NOT_FOUND,
         });
 
-      newData = { ...rest, usuario: usuario };
+      newData = { ...rest, usuario: usuarioId };
     } else {
       newData = updateDto;
     }
