@@ -17,6 +17,7 @@ import { envs } from './config';
       database: envs.dbDatabase,
       synchronize: true,
       autoLoadEntities: true,
+      ssl: false,
     }),
     AuthModule,
   ],
