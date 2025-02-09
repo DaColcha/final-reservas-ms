@@ -22,6 +22,7 @@ export class ReservasService {
   ) {}
 
   async create(createReservaDto: CreateReservaDto) {
+    console.log('Creando reserva con información: ', createReservaDto);
     const mesa: MesaDto = await firstValueFrom(
       this.mesasClient
         .send<MesaDto>('findAvailableMesa', {
